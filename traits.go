@@ -142,7 +142,7 @@ func fieldString(object *Object, key string) string {
 
 // isJSONSchemaFormat reports whether a Multi Format Schema Object's
 // schemaFormat is JSON Schema, an AsyncAPI schema or an OpenAPI schema, the
-// formats the generator reads. Avro, RAML, Protobuf and others are not.
+// formats Load returns as schemas. Avro, RAML, Protobuf and others are not.
 func isJSONSchemaFormat(schemaFormat string) bool {
 	format := strings.ToLower(schemaFormat)
 

@@ -1,0 +1,8 @@
+{
+  "name": "go-asyncapi",
+  "description": "Go library that loads AsyncAPI 3 documents into servers, channels, operations and messages, with $refs followed across files and traits merged.",
+  "author": { "name": "psyb0t", "url": "https://github.com/psyb0t" },
+  "homepage": "https://github.com/psyb0t/go-asyncapi",
+  "license": "MIT",
+  "keywords": ["asyncapi", "asyncapi3", "parser", "go-library", "event-driven", "websocket"]
+}

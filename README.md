@@ -48,7 +48,16 @@ if err != nil {
 	return err
 }
 
-properties := schema.(*asyncapi.Object).Object("properties")
+object, ok := schema.(*asyncapi.Object) // false for a `true`/`false` schema
+if !ok {
+	return nil
+}
+
+properties := object.Object("properties") // nil without a properties keyword
+if properties == nil {
+	return nil
+}
+
 for _, name := range properties.Keys {
 	fmt.Println(name)
 }
@@ -68,6 +77,34 @@ Payloads in AsyncAPI, JSON Schema or OpenAPI format load as schemas. Any other `
 - local and relative-file `$ref`s, chains included; a cycle or a remote URL is an error
 
 Errors wrap [`ctxerrors/commerr`](https://github.com/psyb0t/ctxerrors) sentinels, so `errors.Is(err, commerr.ErrNotFound)` catches a dangling `$ref` and `commerr.ErrInvalidValue` catches a malformed section.
+
+## Agent integrations
+
+The [skill](.agents/skills/go-asyncapi) teaches a coding agent how to use go-asyncapi when it writes Go. It works in any agent that reads `.agents/skills/`, and installs natively in the clients below.
+
+### Claude Code
+
+```bash
+claude plugin marketplace add psyb0t/agents
+claude plugin install go-asyncapi@psyb0t
+```
+
+### Codex
+
+```bash
+codex plugin marketplace add psyb0t/agents
+codex plugin add go-asyncapi@psyb0t
+```
+
+Codex also picks the skill up with no install in any checkout of this repo.
+
+### OpenClaw
+
+The skill is published to ClawHub on every release:
+
+```bash
+openclaw skills install @psyb0t/go-asyncapi
+```
 
 ## Development
 

@@ -236,8 +236,8 @@ type SchemaComponent struct {
 }
 
 // loadComponents picks up component messages and schemas that no channel or
-// operation references, so the reusable library in components is generated
-// in full.
+// operation references, so Messages and ComponentSchemas list everything the
+// components section defines.
 func (d *Document) loadComponents(components *Object) error {
 	if components == nil {
 		return nil
@@ -649,8 +649,8 @@ func (d *Document) loadCorrelationID(
 }
 
 // schema dereferences a payload or headers value and unwraps a Multi Format
-// Schema Object. A schema in a format the generator cannot read comes back as
-// nil with the format's name.
+// Schema Object. A schema in a format other than JSON Schema, AsyncAPI or
+// OpenAPI comes back as nil with the format's name.
 func (d *Document) schema(
 	value any,
 	at Location,

@@ -2,6 +2,11 @@
 
 All notable changes per release. Versions follow [semver](https://semver.org).
 
+## v0.1.1, 2026-10-15
+
+- Added the `go-asyncapi` agent skill, which teaches a coding agent how to load specs and walk their schemas with this library. It installs from the psyb0t Claude Code and Codex marketplaces and from ClawHub with `openclaw skills install @psyb0t/go-asyncapi`.
+- Doc comments no longer describe the library in terms of a code generator.
+
 ## v0.1.0, 2026-10-15
 
 - Added `Load`, which reads an AsyncAPI 3 document in YAML or JSON and returns its servers, channels, operations, messages and component schemas in document order, with local and relative-file `$ref`s followed and message and operation traits merged.
