@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Go 1.26.9 or newer, per the module's `go.mod`.
+- Go 1.26.10 or newer, per the module's `go.mod`.
 - Runtime dependencies: `github.com/psyb0t/ctxerrors` and `gopkg.in/yaml.v3`.
 
 ## Install

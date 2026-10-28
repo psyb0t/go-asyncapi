@@ -1,6 +1,6 @@
 module github.com/psyb0t/go-asyncapi
 
-go 1.26.9
+go 1.26.10
 
 require (
 	github.com/psyb0t/ctxerrors v0.7.1

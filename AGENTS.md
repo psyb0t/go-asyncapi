@@ -15,7 +15,7 @@ Data flow: `Load` → `Resolver.Document` (root file) → section loaders → `R
 
 ## Stack
 
-- Go 1.26.9, one package at the module root.
+- Go 1.26.10, one package at the module root.
 - Errors: `github.com/psyb0t/ctxerrors` wrapping `ctxerrors/commerr` sentinels.
 - YAML and JSON: `gopkg.in/yaml.v3` (JSON is valid YAML).
 - No logging: it is a library.
