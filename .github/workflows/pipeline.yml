@@ -1,5 +1,11 @@
 name: pipeline
 
+# A Go library: no image, no binaries. Every branch push runs lint, the tests
+# with the coverage gate and the security scan in the dev image, and validates
+# the agent skill. A push to main then refreshes the badges. A v* tag does not
+# rerun the checks: it waits for that commit's main run to succeed, cuts the
+# GitHub release from the annotated tag message, publishes the skill to
+# ClawHub, and refreshes the badges with the main run's coverage.
 on:
   push:
   # Weekly run that refreshes the imported-by badge. pkg.go.dev updates its
@@ -13,8 +19,13 @@ on:
     - cron: "29 14 * * 2"
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
+  # make lint, make test-coverage and make sec all run inside the Dockerfile.dev
+  # image, so the runner needs only Docker and Make. No credentials.
   code:
+    if: "!startsWith(github.ref, 'refs/tags/')"
     permissions:
       contents: read
       security-events: write # uploads the security scan SARIF
@@ -27,28 +38,37 @@ jobs:
       sarif_file: "sec.sarif"
       sarif_category: "go"
 
-  badges:
-    needs: [code]
-    if: github.ref_name == github.event.repository.default_branch || startsWith(github.ref, 'refs/tags/')
+  wait:
+    if: startsWith(github.ref, 'refs/tags/')
     permissions:
-      contents: write
-    uses: psyb0t/reusable-github-workflows/.github/workflows/create-badges.yml@master
-    with:
-      coverage: true
-      importers: true
+      actions: read
+    uses: psyb0t/reusable-github-workflows/.github/workflows/wait-for-default-branch.yml@master
 
-  # Publishes a GitHub release for each tag once the checks pass.
   release:
-    needs: [code]
+    needs: [wait]
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
     uses: psyb0t/reusable-github-workflows/.github/workflows/release-workflow.yml@master
 
-  # Validates the agent skills under .agents/skills/ on every push and publishes
-  # them to ClawHub on tag pushes, once the checks pass.
-  clawhub:
-    needs: [code]
+  # Tag runs read the coverage artifact from the main run they release.
+  badges:
+    needs: [code, wait]
+    if: "always() && ((github.ref_name == github.event.repository.default_branch && needs.code.result == 'success') || (startsWith(github.ref, 'refs/tags/') && needs.wait.result == 'success'))"
+    permissions:
+      contents: write
+      actions: read # cross-run coverage artifact download on tags
+    uses: psyb0t/reusable-github-workflows/.github/workflows/create-badges.yml@master
+    with:
+      coverage: true
+      coverage_run_id: ${{ needs.wait.outputs.run_id }}
+      importers: true
+
+  # Validates the agent skill after the checks on every branch push, and
+  # validates and publishes it to ClawHub after the release on a tag push.
+  publish-to-clawhub:
+    needs: [code, release]
+    if: "always() && (needs.code.result == 'success' || needs.release.result == 'success')"
     permissions:
       contents: read
     uses: psyb0t/reusable-github-workflows/.github/workflows/clawhub-publish.yml@master

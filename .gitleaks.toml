@@ -20,5 +20,4 @@ paths = [
   '''(^|/)sec\.sarif$''',
   '''(^|/)coverage-percent\.txt$''',
   '''(^|/)git-update\.sh(?:\.debot)?$''',
-  '''(^|/)CLAUDE\.md$''',
 ]

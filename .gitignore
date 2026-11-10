@@ -24,9 +24,7 @@ profile.out
 htmlcov/
 __pycache__
 *.out
-CLAUDE.md
 CLAUDE.local.md
-.claude
 .research_files
 .refactor/
 .anustimes/
@@ -39,3 +37,7 @@ git-update.sh
 git-update.sh.debot
 .testing/
 coverage-percent.txt
+*.local.json
+
+# Upstream agent notes inside vendored modules.
+vendor/**/CLAUDE.md

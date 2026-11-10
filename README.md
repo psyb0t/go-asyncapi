@@ -4,7 +4,7 @@
 [![CI](https://github.com/psyb0t/go-asyncapi/actions/workflows/pipeline.yml/badge.svg?branch=main)](https://github.com/psyb0t/go-asyncapi/actions/workflows/pipeline.yml)
 [![coverage](https://raw.githubusercontent.com/psyb0t/go-asyncapi/badges/coverage.svg)](https://github.com/psyb0t/go-asyncapi/actions/workflows/pipeline.yml)
 [![version](https://raw.githubusercontent.com/psyb0t/go-asyncapi/badges/version.svg)](https://github.com/psyb0t/go-asyncapi/tags)
-[![license](https://raw.githubusercontent.com/psyb0t/go-asyncapi/badges/license.svg)](LICENSE)
+[![license](https://raw.githubusercontent.com/psyb0t/go-asyncapi/badges/license.svg)](https://github.com/psyb0t/go-asyncapi/blob/main/LICENSE)
 [![imported by](https://raw.githubusercontent.com/psyb0t/go-asyncapi/badges/importers.svg)](https://github.com/psyb0t/go-asyncapi/blob/badges/importers.md)
 
 Loads AsyncAPI 3 documents in Go. Point it at a YAML or JSON file and you get servers, channels, operations and messages as plain structs, with every `$ref` followed, across files too, and every trait merged in. [gen-asyncapi](https://github.com/psyb0t/gen-asyncapi) is built on it.
@@ -36,75 +36,31 @@ for _, operation := range document.Operations {
 
 Everything comes back in the order the document lists it. A message used by several channels is one `*Message`, so you can compare pointers. Traits are already merged: a trait fills what the message or operation leaves out and never overrides what it sets.
 
-## Schemas
+Payload and header schemas stay as they are in the document, as `*asyncapi.Object` trees that keep key order, and `document.Resolver.Deref` follows the `$ref`s inside them. Errors wrap [`ctxerrors/commerr`](https://github.com/psyb0t/ctxerrors) sentinels, so `errors.Is(err, commerr.ErrNotFound)` catches a dangling `$ref`. A `$ref` to a remote URL is an error. The library never touches the network.
 
-Payload and header schemas stay as they are in the document, as `*asyncapi.Object` trees that keep key order. `Object.Get`, `Object.String` and `Object.Object` read them, and the document's `Resolver` follows the `$ref`s inside:
+## Documentation
 
-```go
-message := document.Messages[0]
+The full docs live at **[psyb0t.github.io/go-asyncapi](https://psyb0t.github.io/go-asyncapi/)**.
 
-schema, at, err := document.Resolver.Deref(message.Payload, message.PayloadAt)
-if err != nil {
-	return err
-}
-
-object, ok := schema.(*asyncapi.Object) // false for a `true`/`false` schema
-if !ok {
-	return nil
-}
-
-properties := object.Object("properties") // nil without a properties keyword
-if properties == nil {
-	return nil
-}
-
-for _, name := range properties.Keys {
-	fmt.Println(name)
-}
-```
-
-`Deref` returns the resolved value and its `Location`, a file plus a JSON pointer. Two `$ref`s that land on the same `Location` point at the same schema, so it works as a map key when you need each schema once.
-
-Payloads in AsyncAPI, JSON Schema or OpenAPI format load as schemas. Any other `schemaFormat`, such as Avro, leaves `Payload` nil and names the format in `UnsupportedFormat`.
-
-## What it reads
-
-- `servers` with variables, enums and defaults, plus `URL()` and `URLTemplate()`
-- `channels` with addresses, parameters and messages; a null address stays empty
-- `operations` with action, channel, messages and replies, including dynamic reply addresses
-- `messages` with payload, headers, `correlationId`, content type (falling back to `defaultContentType`), bindings and the deprecated flag
-- `components`, with every `$ref` into them resolved, and `components.schemas` listed in order
-- local and relative-file `$ref`s, chains included; a cycle or a remote URL is an error
-
-Errors wrap [`ctxerrors/commerr`](https://github.com/psyb0t/ctxerrors) sentinels, so `errors.Is(err, commerr.ErrNotFound)` catches a dangling `$ref` and `commerr.ErrInvalidValue` catches a malformed section.
+| Page | What's in it |
+| --- | --- |
+| [Loading documents](https://psyb0t.github.io/go-asyncapi/loading/) | What `Load` reads and skips, `$ref` rules, traits, schema formats, ordering |
+| [Walking schemas](https://psyb0t.github.io/go-asyncapi/schemas/) | `Object` trees, `Resolver.Deref`, `Location.Child`, visiting each schema once |
+| [API reference](https://psyb0t.github.io/go-asyncapi/api/) | Every exported type, field and method |
+| [Errors](https://psyb0t.github.io/go-asyncapi/errors/) | Each `commerr` sentinel and the failure it stands for |
+| [Agent skill](https://psyb0t.github.io/go-asyncapi/agent-skill/) | Installing the skill in Claude Code, Codex and OpenClaw |
+| [Development](https://psyb0t.github.io/go-asyncapi/development/) | Make targets, the dev image, tests, CI and releases |
 
 ## Agent integrations
 
-The [skill](.agents/skills/go-asyncapi) teaches a coding agent how to use go-asyncapi when it writes Go. It works in any agent that reads `.agents/skills/`, and installs natively in the clients below.
-
-### Claude Code
+The [skill](https://github.com/psyb0t/go-asyncapi/tree/main/.agents/skills/go-asyncapi) teaches a coding agent how to use go-asyncapi when it writes Go. In Claude Code:
 
 ```bash
 claude plugin marketplace add psyb0t/agents
 claude plugin install go-asyncapi@psyb0t
 ```
 
-### Codex
-
-```bash
-codex plugin marketplace add psyb0t/agents
-codex plugin add go-asyncapi@psyb0t
-```
-
-Codex also picks the skill up with no install in any checkout of this repo.
-
-### OpenClaw
-
-The skill is published to ClawHub on every release:
-
-```bash
-openclaw skills install @psyb0t/go-asyncapi
-```
+Codex and OpenClaw install it too. See [Agent skill](https://psyb0t.github.io/go-asyncapi/agent-skill/).
 
 ## Development
 
@@ -115,8 +71,15 @@ make help           # list targets
 make lint           # shellcheck, shfmt, go fix, golangci-lint
 make test-coverage  # go test -race with a 90% coverage gate
 make sec            # gitleaks, govulncheck, semgrep
+make docs           # build the docs site locally
 ```
+
+More on [Development](https://psyb0t.github.io/go-asyncapi/development/).
+
+## Sponsor
+
+<a href="https://www.buymeacoffee.com/psyb0t"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me a Coffee" height="60" width="217"></a>
 
 ## License
 
-[MIT](LICENSE).
+[MIT](https://github.com/psyb0t/go-asyncapi/blob/main/LICENSE).

@@ -67,9 +67,10 @@ Errors wrap `github.com/psyb0t/ctxerrors/commerr` sentinels and carry file and l
 
 | Sentinel | When |
 |---|---|
-| `commerr.ErrNotFound` | A `$ref` or JSON pointer points at nothing. |
+| `commerr.ErrNotFound` | A `$ref` or JSON pointer points at nothing, or an operation's channel is not an entry under `channels`. |
 | `commerr.ErrInvalidValue` | Not AsyncAPI 3, a section that should be a mapping is not, an unknown operation action, a `$ref` cycle. |
 | `commerr.ErrInvalidArgument` | A `$ref` to a remote URL. |
+| `commerr.ErrRequiredFieldNotSet` | An operation without a `channel`. |
 | `commerr.ErrParseFailed` | The file is not valid YAML or JSON, or its top level is not a mapping. |
 | `os.ErrNotExist` | The spec file or a referenced file is missing. |
 

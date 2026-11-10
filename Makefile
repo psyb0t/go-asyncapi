@@ -2,6 +2,9 @@ DEV_IMAGE := go-asyncapi-dev
 UID := $(shell id -u)
 GID := $(shell id -g)
 MIN_TEST_COVERAGE := 90
+# The image GitHub Pages builds the docs site with, so a local build matches the
+# published one.
+DOCS_IMAGE := ghcr.io/actions/jekyll-build-pages:v1.0.13@sha256:6791ebfd912185ed59bfb5fb102664fa872496b79f87ff8b9cfba292a7345041
 
 # Every Go and tooling command runs inside the dev image, so the toolchain
 # (Go 1.26.10), the linter and the security scanners are identical in a local
@@ -21,7 +24,7 @@ DEV_RUN := docker run --rm --init \
 	$(DEV_IMAGE)
 
 .PHONY: all dev-image dep format lint lint-fix shell test test-unit \
-	test-coverage sec help
+	test-coverage sec docs help
 
 all: dep lint test ## Run dep, lint and test
 
@@ -54,6 +57,18 @@ test-coverage: dev-image ## Run tests with coverage check. Fails if coverage is 
 
 sec: dev-image ## Security scan (gitleaks, govulncheck, semgrep) merged into sec.sarif; gates on findings
 	@$(DEV_RUN) bash scripts/sec.sh
+
+docs: ## Build the docs/ site locally with the GitHub Pages image
+	@docker run --rm \
+		--user $(UID):$(GID) \
+		-e HOME=/tmp \
+		-e GITHUB_WORKSPACE=/work \
+		-e GITHUB_REPOSITORY=psyb0t/go-asyncapi \
+		-e INPUT_SOURCE=docs \
+		-e INPUT_DESTINATION=.testing/docs-site \
+		-e INPUT_VERBOSE=false \
+		-v $(CURDIR):/work \
+		$(DOCS_IMAGE)
 
 help: ## Display this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
