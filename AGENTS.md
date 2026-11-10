@@ -58,7 +58,7 @@ make sec            # gitleaks, govulncheck, semgrep
 make docs           # build docs/ with the GitHub Pages image
 ```
 
-CI runs `make lint`, `make test-coverage` and `make sec` on every branch push. A tag waits for the tagged commit's `main` run, then cuts the release and publishes the skill.
+CI runs `make lint`, `make test-coverage` and `make sec` on every branch push. A tag push does not rerun the checks: `pipeline.yml` waits for the tagged commit's `main` run, cuts the GitHub release from the annotated tag message, then publishes the skill through the `publish-to-clawhub` job. Push the commit to `main` before tagging it.
 
 ## Project-specific landmines
 
@@ -73,7 +73,6 @@ Rules for every change live in `.agents/rules/`:
 
 | File | Covers |
 | --- | --- |
-| `go-code.md` | Errors, API shape, comments, lint |
-| `testing.md` | Test layout, fixtures, coverage |
-| `docs.md` | README, the docs site, keeping docs in step with the code |
-| `releases.md` | Versions, CHANGELOG, the agent skill, CI |
+| `go-code.md` | Error sentinels, `$ref` locations, ordered objects, doc comments |
+| `testing.md` | Black-box tests, fixtures, loader branch tests |
+| `docs.md` | Which docs pages and the agent skill move with the code |
